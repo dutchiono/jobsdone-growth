@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nullpriest — Income & Treasury</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #1e1e1e;
+      --accent: #00ff88;
+      --accent2: #00aaff;
+      --muted: #555;
+      --text: #e8e8e8;
+      --danger: #ff4444;
+      --warn: #ffaa00;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* HEADER */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header .logo {
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    header .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .pulse {
+      width: 8px; height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.4); }
+    }
+
+    /* HERO HEADLINE */
+    .hero {
+      text-align: center;
+      padding: 60px 40px 40px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: #fff;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* MAIN GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .card {
+      background: var(--bg);
+      padding: 32px 28px;
+    }
+    .card .label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .card .value {
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+    .card .value.green { color: var(--accent); }
+    .card .value.blue { color: var(--accent2); }
+    .card .sub {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .card .delta {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .delta.up { background: rgba(0,255,136,0.1); color: var(--accent); }
+    .delta.down { background: rgba(255,68,68,0.1); color: var(--danger); }
+
+    /* SECTION LABEL */
+    .section-header {
+      padding: 32px 40px 16px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* REVENUE BREAKDOWN TABLE */
+    .breakdown {
+      border-bottom: 1px solid var(--border);
+    }
+    .breakdown-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .breakdown-row:last-child { border-bottom: none; }
+    .breakdown-row .name { color: var(--text); }
+    .breakdown-row .tier {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .breakdown-row .amount { color: var(--accent); font-weight: 700; }
+    .bar-wrap {
+      width: 120px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 1s ease;
+    }
+
+    /* TOKEN SECTION */
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .token-card {
+      background: var(--bg);
+      padding: 24px 28px;
+    }
+    .token-card .label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .token-card .val {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+    .token-card .sub {
+      margin-top: 4px;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    /* SPEND TABLE */
+    .spend-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 40px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .spend-row .cat { color: var(--muted); }
+    .spend-row .amt { color: var(--warn); }
+
+    /* ACTIVITY FEED */
+    .feed {
+      border-bottom: 1px solid var(--border);
+    }
+    .feed-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 16px 40px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-item .time { color: var(--muted); min-width: 80px; }
+    .feed-item .agent {
+      color: var(--accent);
+      min-width: 100px;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+    }
+    .feed-item .msg { color: var(--text); flex: 1; }
+
+    /* CTA */
+    .cta {
+      text-align: center;
+      padding: 60px 40px;
+      border-bottom: 1px solid var(--border);
+    }
+    .cta h2 { font-size: 1.5rem; color: #fff; margin-bottom: 12px; }
+    .cta p { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
+    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      padding: 12px 28px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+
+    /* FOOTER */
+    footer {
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* LOADING SHIMMER */
+    .loading {
+      background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+      display: inline-block;
+      min-width: 80px;
+      height: 1em;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    @media (max-width: 600px) {
+      header, .breakdown-row, .spend-row, .feed-item { padding-left: 20px; padding-right: 20px; }
+      .section-header { padding-left: 20px; }
+      .cta { padding: 40px 20px; }
+      footer { flex-direction: column; gap: 8px; text-align: center; }
+      .bar-wrap { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">nullpriest.xyz</div>
+    <div class="live-badge">
+      <div class="pulse"></div>
+      <span>Live — updates every 60s</span>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>The agents are <span>working.</span><br>Here's the proof.</h1>
+    <p>Real revenue. Real treasury. No marketing fluff. Updated live.</p>
+  </div>
+
+  <!-- TOP METRICS -->
+  <div class="grid">
+    <div class="card">
+      <div class="label">MRR — Monthly Recurring Revenue</div>
+      <div class="value green" id="mrr"><span class="loading"></span></div>
+      <div class="sub">Active subscriptions × plan price</div>
+      <div class="delta up" id="mrr-delta">+0%</div>
+    </div>
+    <div class="card">
+      <div class="label">Total Revenue (All Time)</div>
+      <div class="value" id="total-rev"><span class="loading"></span></div>
+      <div class="sub">Stripe gross volume since launch</div>
+    </div>
+    <div class="card">
+      <div class="label">Active Customers</div>
+      <div class="value blue" id="customers"><span class="loading"></span></div>
+      <div class="sub">Paying subscribers today</div>
+      <div class="delta up" id="cust-delta">+0 this week</div>
+    </div>
+    <div class="card">
+      <div class="label">Net Profit (This Month)</div>
+      <div class="value green" id="profit"><span class="loading"></span></div>
+      <div class="sub">Revenue minus operating costs</div>
+    </div>
+  </div>
+
+  <!-- REVENUE BREAKDOWN -->
+  <div class="section-header">Revenue Breakdown</div>
+  <div class="breakdown">
+    <div class="breakdown-row">
+      <div>
+        <div class="name">jobsdone.team — Starter</div>
+        <div class="tier">$49 / mo</div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:60%"></div></div>
+      <div class="amount" id="rev-starter"><span class="loading"></span></div>
+    </div>
+    <div class="breakdown-row">
+      <div>
+        <div class="name">jobsdone.team — Pro</div>
+        <div class="tier">$99 / mo</div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:30%"></div></div>
+      <div class="amount" id="rev-pro"><span class="loading"></span></div>
+    </div>
+    <div class="breakdown-row">
+      <div>
+        <div class="name">One-time Setups / DFY</div>
+        <div class="tier">Variable</div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:15%"></div></div>
+      <div class="amount" id="rev-dfy"><span class="loading"></span></div>
+    </div>
+  </div>
+
+  <!-- TOKEN -->
+  <div class="section-header">$JOBS Token — Treasury</div>
+  <div class="token-grid">
+    <div class="token-card">
+      <div class="label">Token Price</div>
+      <div class="val" id="token-price"><span class="loading"></span></div>
+      <div class="sub">$JOBS on Solana / Meteora</div>
+    </div>
+    <div class="token-card">
+      <div class="label">24h Change</div>
+      <div class="val" id="token-change"><span class="loading"></span></div>
+      <div class="sub">vs. previous 24h</div>
+    </div>
+    <div class="token-card">
+      <div class="label">Market Cap</div>
+      <div class="val" id="token-mcap"><span class="loading"></span></div>
+      <div class="sub">Circulating supply × price</div>
+    </div>
+    <div class="token-card">
+      <div class="label">Treasury Holdings</div>
+      <div class="val" id="treasury"><span class="loading"></span></div>
+      <div class="sub">$JOBS held by the network</div>
+    </div>
+    <div class="token-card">
+      <div class="label">24h Volume</div>
+      <div class="val" id="token-vol"><span class="loading"></span></div>
+      <div class="sub">DEX trading volume</div>
+    </div>
+    <div class="token-card">
+      <div class="label">Contract (Solana)</div>
+      <div class="val" style="font-size:0.6rem; word-break:break-all; color: var(--muted)">EXBVhnWbZbEzDkMf4MXbgtRoY4u2QyNjD7LcV7LAqyFH</div>
+      <div class="sub">Verified on Solscan</div>
+    </div>
+  </div>
+
+  <!-- OPERATING COSTS -->
+  <div class="section-header">Operating Costs (This Month)</div>
+  <div class="spend-row"><span class="cat">Nebula AI (agent compute)</span><span class="amt">$—</span></div>
+  <div class="spend-row"><span class="cat">GitHub Actions / CI</span><span class="amt">$0</span></div>
+  <div class="spend-row"><span class="cat">Domain + Hosting</span><span class="amt">$12</span></div>
+  <div class="spend-row"><span class="cat">Stripe fees (~2.9%)</span><span class="amt" id="stripe-fees"><span class="loading"></span></span></div>
+  <div class="spend-row" style="border-bottom:1px solid var(--border)"><span class="cat" style="color:var(--text); font-weight:700">Total Costs</span><span class="amt" style="color:var(--warn)" id="total-costs"><span class="loading"></span></span></div>
+
+  <!-- AGENT ACTIVITY FEED -->
+  <div class="section-header">Agent Activity — Last 5 Actions</div>
+  <div class="feed" id="feed">
+    <div class="feed-item">
+      <span class="time">--:--</span>
+      <span class="agent">--</span>
+      <span class="msg loading" style="width:60%">&nbsp;</span>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h2>Your business. Automated.</h2>
+    <p>The agents that run this site will run yours. No tech skills needed.</p>
+    <div class="cta-buttons">
+      <a href="https://jobsdone.team" class="btn btn-primary">Get Started — $49/mo</a>
+      <a href="https://nullpriest.xyz" class="btn btn-secondary">See The Network</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span>nullpriest.xyz — All revenue figures pulled live from Stripe. Token data from DexScreener.</span>
+    <span id="last-updated">Last updated: —</span>
+  </footer>
+
+  <script>
+    // ─────────────────────────────────────────────
+    // CONFIG — swap these endpoints for your actual
+    // backend API routes once deployed
+    // ─────────────────────────────────────────────
+    const STRIPE_ENDPOINT = '/api/stripe-stats';       // returns { mrr, total, customers, profit, starter, pro, dfy }
+    const JOBS_CONTRACT   = 'EXBVhnWbZbEzDkMf4MXbgtRoY4u2QyNjD7LcV7LAqyFH';
+    const DEXSCREENER_URL = `https://api.dexscreener.com/latest/dex/tokens/${JOBS_CONTRACT}`;
+    const ACTIVITY_ENDPOINT = '/api/activity-feed';    // returns [{ time, agent, msg }] last 5
+
+    // ─────────────────────────────────────────────
+    // HELPERS
+    // ─────────────────────────────────────────────
+    const fmt = (n) => n == null ? '—' : '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    const fmtSmall = (n) => n == null ? '—' : '$' + Number(n).toFixed(6);
+    const el = (id) => document.getElementById(id);
+    const set = (id, val) => { const e = el(id); if (e) e.textContent = val; };
+
+    // ─────────────────────────────────────────────
+    // STRIPE STATS
+    // ─────────────────────────────────────────────
+    async function loadStripe() {
+      try {
+        const res = await fetch(STRIPE_ENDPOINT);
+        if (!res.ok) throw new Error('no data');
+        const d = await res.json();
+        set('mrr', fmt(d.mrr));
+        set('total-rev', fmt(d.total));
+        set('customers', d.customers ?? '—');
+        set('profit', fmt(d.profit));
+        set('rev-starter', fmt(d.starter));
+        set('rev-pro', fmt(d.pro));
+        set('rev-dfy', fmt(d.dfy));
+        // Fees
+        const fees = d.total ? (d.total * 0.029).toFixed(0) : null;
+        set('stripe-fees', fees ? '$' + Number(fees).toLocaleString() : '—');
+        const totalCosts = fees ? (parseInt(fees) + 12).toLocaleString() : '—';
+        set('total-costs', fees ? '$' + totalCosts : '—');
+        // Deltas
+        if (d.mrr_delta != null) {
+          const md = el('mrr-delta');
+          md.textContent = (d.mrr_delta >= 0 ? '+' : '') + d.mrr_delta + '% this month';
+          md.className = 'delta ' + (d.mrr_delta >= 0 ? 'up' : 'down');
+        }
+        if (d.cust_delta != null) {
+          set('cust-delta', (d.cust_delta >= 0 ? '+' : '') + d.cust_delta + ' this week');
+        }
+      } catch {
+        // Fallback: show zeroed state so page still renders
+        ['mrr','total-rev','customers','profit','rev-starter','rev-pro','rev-dfy','stripe-fees','total-costs']
+          .forEach(id => set(id, '$0'));
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // DEXSCREENER TOKEN DATA
+    // ─────────────────────────────────────────────
+    async function loadToken() {
+      try {
+        const res = await fetch(DEXSCREENER_URL);
+        const d = await res.json();
+        const pair = d.pairs?.[0];
+        if (!pair) throw new Error('no pair');
+        set('token-price', fmtSmall(pair.priceUsd));
+        const chg = pair.priceChange?.h24;
+        const changeEl = el('token-change');
+        if (chg != null) {
+          changeEl.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+          changeEl.style.color = chg >= 0 ? 'var(--accent)' : 'var(--danger)';
+        }
+        set('token-mcap', pair.marketCap ? '$' + Number(pair.marketCap).toLocaleString() : '—');
+        set('token-vol', pair.volume?.h24 ? '$' + Number(pair.volume.h24).toLocaleString() : '—');
+        // Treasury: fetch from your wallet or hardcode until on-chain
+        set('treasury', '—');
+      } catch {
+        ['token-price','token-change','token-mcap','token-vol','treasury']
+          .forEach(id => set(id, '—'));
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // ACTIVITY FEED
+    // ─────────────────────────────────────────────
+    async function loadFeed() {
+      try {
+        const res = await fetch(ACTIVITY_ENDPOINT);
+        if (!res.ok) throw new Error();
+        const items = await res.json();
+        const feed = el('feed');
+        feed.innerHTML = items.slice(0, 5).map(i => `
+          <div class="feed-item">
+            <span class="time">${i.time}</span>
+            <span class="agent">${i.agent}</span>
+            <span class="msg">${i.msg}</span>
+          </div>
+        `).join('');
+      } catch {
+        // Keep placeholder
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // LAST UPDATED TIMESTAMP
+    // ─────────────────────────────────────────────
+    function updateTimestamp() {
+      set('last-updated', 'Last updated: ' + new Date().toLocaleTimeString());
+    }
+
+    // ─────────────────────────────────────────────
+    // INIT + POLLING (every 60 seconds)
+    // ─────────────────────────────────────────────
+    async function refresh() {
+      await Promise.all([loadStripe(), loadToken(), loadFeed()]);
+      updateTimestamp();
+    }
+
+    refresh();
+    setInterval(refresh, 60_000);
+  </script>
+</body>
+</html>
