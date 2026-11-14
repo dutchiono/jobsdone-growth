@@ -12,7 +12,8 @@ const outDir = '.audit'; mkdirSync(outDir,{recursive:true});
 function gh(...args){return execFileSync('gh',args,{encoding:'utf8',maxBuffer:50*1024*1024,stdio:['ignore','pipe','pipe']});}
 function json(...args){return JSON.parse(gh(...args));}
 function csv(v){return '"'+String(v??'').replaceAll('"','""')+'"';}
-const repos=json('api','--paginate','/user/repos?per_page=100&affiliation=owner,collaborator,organization_member').filter(x=>!x.disabled);
+const pages=json('api','--paginate','--slurp','/user/repos?per_page=100&affiliation=owner,collaborator,organization_member');
+const repos=pages.flat().filter(x=>!x.disabled);
 const byName=new Map(repos.map(r=>[r.full_name,r]));
 const all=[];
 for(const r of byName.values()){
@@ -37,8 +38,8 @@ for(const r of byName.values()){
     disposition:'needs-investigation'
   };
   try{
-    const result=json('api',`repos/${r.full_name}/readme`,'-H','Accept: application/vnd.github.raw+json');
-    item.readme_status=typeof result==='string'?'found':'found';
+    gh('api',`repos/${r.full_name}/readme`,'-H','Accept: application/vnd.github.raw+json');
+    item.readme_status='found';
   } catch {item.readme_status='missing-or-inaccessible';}
   all.push(item);
 }
